@@ -4,4 +4,4 @@
 DROP INDEX IF EXISTS index_name_first
 
 CREATE INDEX index_name_first
-ON names (name(1));
+ON names (SUBSTR(name, 1, 1));
