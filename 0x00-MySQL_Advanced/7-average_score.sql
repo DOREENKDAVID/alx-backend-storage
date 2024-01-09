@@ -4,22 +4,22 @@
 
 DELIMITER //
 
-CREATE PROCEDURE ComputeAverageScoreForUser(
-    IN in_user_id INT
-)
+CREATE PROCEDURE ComputeAverageScoreForUser ((user_id INT)
 BEGIN
-    DECLARE avg_score DECIMAL(10, 2);
+    DECLARE total_score INT DEFAULT 0;
+    DECLARE projects_count INT DEFAULT 0;
 
-    -- Calculate the average score for the user
-    SELECT AVG(score) INTO avg_score
-    FROM bonuses
-    WHERE user_id = in_user_id;
+    SELECT SUM(score)
+        INTO total_score
+        FROM corrections
+        WHERE corrections.user_id = user_id;
+    SELECT COUNT(*)
+        INTO projects_count
+        FROM corrections
+        WHERE corrections.user_id = user_id;
 
-    -- Store the calculated average score in a separate table or update an existing record
-    -- For example, assuming a table 'average_scores' to store average scores for users
-    INSERT INTO average_scores (user_id, average_score)
-    VALUES (in_user_id, avg_score)
-    ON DUPLICATE KEY UPDATE average_score = avg_score;
+    UPDATE users
+        SET users.average_score = IF(projects_count = 0, 0, total_score / projects_count)
+        WHERE users.id = user_id;
 END //
-
 DELIMITER ;
